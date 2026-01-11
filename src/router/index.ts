@@ -34,7 +34,7 @@ const router = createRouter({
       component: () => import('@/views/Form/PublicView.vue'),
     },
     {
-      path: '/forms/:formId/response',
+      path: '/forms/:formId/responses',
       name: 'formResponses',
       component: () => import('@/views/Form/ResponsesView.vue'),
     },
