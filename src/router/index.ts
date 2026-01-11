@@ -19,22 +19,22 @@ const router = createRouter({
       component: () => import('@/views/RegisterView.vue'),
     },
     {
-      path: '/form/dashboard',
+      path: '/forms/dashboard',
       name: 'dashboard',
       component: () => import('@/views/Form/DashboardView.vue'),
     },
     {
-      path: '/form/:formId/edit',
+      path: '/forms/:formId/edit',
       name: 'editForm',
       component: () => import('@/views/Form/EditView.vue'),
     },
     {
-      path: '/form/:formId',
+      path: '/forms/:formId',
       name: 'publicForm',
       component: () => import('@/views/Form/PublicView.vue'),
     },
     {
-      path: '/form/:formId/response',
+      path: '/forms/:formId/response',
       name: 'formResponses',
       component: () => import('@/views/Form/ResponsesView.vue'),
     },
