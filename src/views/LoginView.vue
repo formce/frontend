@@ -16,10 +16,14 @@ const router = useRouter();
 const onSubmit = async () => {
   isSubmitting.value = true;
   try {
+    if (isAuthenticated.value) {
+      router.push('/forms/dashboard');
+    }
     await authStore.login(form);
     // Redirect to dashboard or home page after successful login
     if (isAuthenticated.value) {
-      router.push('/dashboard');
+      console.log("Rerouting to dashboard")
+      router.push('/forms/dashboard');
     }
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || 'An error occurred during login.';

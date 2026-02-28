@@ -27,7 +27,6 @@ export const useAuthStore = defineStore('auth', () => {
             isAuthenticated.value = true;
             const token = response.data.token;
             axios.defaults.headers.common['Authorization'] = token;
-            console.log('Login successful:', response.data);
         } catch (error) {
             console.error('Login failed:', error);
             errorMessage.value = 'Login failed. Please check your credentials and try again.';

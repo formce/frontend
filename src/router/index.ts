@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import {useAuthStore} from "@/stores/auth";
+import {storeToRefs} from "pinia";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,11 +24,17 @@ const router = createRouter({
       path: '/forms/dashboard',
       name: 'dashboard',
       component: () => import('@/views/Form/DashboardView.vue'),
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/forms/:formId/edit',
       name: 'editForm',
       component: () => import('@/views/Form/EditView.vue'),
+      meta: {
+        requiresAuth: true
+      }
     },
     {
       path: '/forms/:formId',
@@ -37,8 +45,26 @@ const router = createRouter({
       path: '/forms/:formId/responses',
       name: 'formResponses',
       component: () => import('@/views/Form/ResponsesView.vue'),
+      meta: {
+        requiresAuth: true
+      }
     },
   ],
+})
+
+router.beforeEach((to, from, next) =>{
+  if (to.meta.requiresAuth){
+    const authStore = useAuthStore();
+    const {isAuthenticated} = storeToRefs(authStore);
+    console.log(isAuthenticated.value)
+    if(! isAuthenticated.value){
+      next('/login')
+    } else{
+      next()
+    }
+  } else {
+    next();
+  }
 })
 
 export default router

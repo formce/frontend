@@ -210,25 +210,25 @@ fetchForms();
                     </RouterLink>
 
                     <RouterLink
-                      :to="`/forms/${form.id}`"
+                      :to="`/forms/${form.id}/responses`"
                       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 12h10M7 17h10" />
                       </svg>
-                      View
+                      Responses
                     </RouterLink>
 
-                    <button
-                      type="button"
+                    <RouterLink
+                      :to="`/forms/${form.id}`"
                       class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
                       title="Copy public link"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41a5 5 0 0 0-7.07-7.07L10 4.93m4 6.07a5 5 0 0 0-7.07 0L5.52 12.4a5 5 0 0 0 7.07 7.07L14 18.07" />
                       </svg>
-                      Link
-                    </button>
+                      View & Share
+                    </RouterLink>
                   </div>
                 </td>
               </tr>
