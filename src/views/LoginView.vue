@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useAuthStore} from "@/stores/auth";
 import {storeToRefs} from "pinia";
-import {reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {useRouter} from "vue-router";
 
 const form = reactive({
@@ -13,17 +13,22 @@ const authStore = useAuthStore();
 const {errorMessage, isAuthenticated} = storeToRefs(authStore);
 const router = useRouter();
 
+onMounted(() => {
+  if (isAuthenticated.value) {
+    const redirect = router.currentRoute.value.query.redirect as string;
+    router.push(redirect || '/projects/dashboard');
+  }
+});
+
 const onSubmit = async () => {
   isSubmitting.value = true;
   try {
-    if (isAuthenticated.value) {
-      router.push('/forms/dashboard');
-    }
     await authStore.login(form);
-    // Redirect to dashboard or home page after successful login
+    // Redirect to dashboard or intended page after successful login
     if (isAuthenticated.value) {
-      console.log("Rerouting to dashboard")
-      router.push('/forms/dashboard');
+      const redirect = router.currentRoute.value.query.redirect as string;
+      console.log("Rerouting to:", redirect || '/projects/dashboard')
+      router.push(redirect || '/projects/dashboard');
     }
   } catch (error: any) {
     errorMessage.value = error.response?.data?.message || 'An error occurred during login.';

@@ -1,44 +1,61 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import axios from "axios";
 
 const route = useRoute();
-const formId = route.params.formId as string; // Placeholder form ID
+const projectId = route.params.projectId as string;
 
 type Question = {
   id: number;
   title: string;
 };
 
+type Page = {
+    id: number;
+    title: string;
+    questions: Question[];
+}
+
 type ResponseRow = {
   id: number;
   submittedAt: string;
-  answers: Record<number, string | string[]>;
+  answers: Record<string, string | string[]>;
 };
 
-const formTitle = ref("");
+const projectTitle = ref("");
 
-const questions = ref<Question[]>([]);
+const pages = ref<Page[]>([]);
 
 const responses = ref<ResponseRow[]>([]);
 
-// Sample questions + responses (replace with API data later)
-const fetchFormData = async (id: string) => {
+const fetchProjectData = async (id: string) => {
   try {
-    const response = await axios.get(`/api/forms/${id}/responses`);
+    const response = await axios.get(`/api/projects/${id}/responses`);
     const data = response.data;
-    formTitle.value = data.form.title;
-    questions.value = data.questions;
+    projectTitle.value = data.project.title;
+    pages.value = data.pages;
     responses.value = data.responses;
   } catch (error) {
-    console.error("Error fetching form responses:", error);;
+    console.error("Error fetching project responses:", error);
   }
 };
 
-fetchFormData(formId);
+onMounted(() => {
+    fetchProjectData(projectId);
+});
 
 const isEmpty = computed(() => responses.value.length === 0);
+
+const flatQuestions = computed(() => {
+    const allQuestions: (Question & { pageId: number })[] = [];
+    pages.value.forEach(p => {
+        if (p.questions) {
+            allQuestions.push(...p.questions.map(q => ({ ...q, pageId: p.id })));
+        }
+    });
+    return allQuestions;
+});
 
 function formatAnswer(v: string | string[] | undefined) {
   if (v == null) return "—";
@@ -54,19 +71,28 @@ function formatAnswer(v: string | string[] | undefined) {
         <div>
           <div class="flex items-center gap-3">
             <RouterLink
-              to="/forms/dashboard"
+              to="/projects/dashboard"
               class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
               </svg>
-              Back
+              Dashboard
+            </RouterLink>
+            <RouterLink
+              :to="`/projects/${projectId}`"
+              class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+              </svg>
+              Project
             </RouterLink>
             <span class="text-xs text-slate-500">Responses</span>
           </div>
 
-          <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-900">{{ formTitle }}</h1>
-          <p class="mt-1 text-sm text-slate-600">All submissions for this form.</p>
+          <h1 class="mt-3 text-2xl font-semibold tracking-tight text-slate-900">{{ projectTitle || 'Loading...' }}</h1>
+          <p class="mt-1 text-sm text-slate-600">All submissions for this project across all pages.</p>
         </div>
 
         <div class="flex flex-wrap gap-2">
@@ -80,7 +106,7 @@ function formatAnswer(v: string | string[] | undefined) {
       </div>
 
       <!-- Table -->
-      <div class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div class="border-b border-slate-200 px-6 py-4">
           <h2 class="text-sm font-semibold text-slate-900">Responses</h2>
           <p class="mt-1 text-sm text-slate-600">
@@ -95,7 +121,7 @@ function formatAnswer(v: string | string[] | undefined) {
             </svg>
           </div>
           <h3 class="mt-4 text-sm font-semibold text-slate-900">No responses yet</h3>
-          <p class="mt-1 text-sm text-slate-600">When someone submits the form, you’ll see it here.</p>
+          <p class="mt-1 text-sm text-slate-600">When someone submits, you’ll see it here.</p>
         </div>
 
         <div v-else class="overflow-x-auto">
@@ -106,34 +132,34 @@ function formatAnswer(v: string | string[] | undefined) {
                   Submitted
                 </th>
                 <th
-                  v-for="q in questions"
-                  :key="q.id"
+                  v-for="q in flatQuestions"
+                  :key="`${q.pageId}_${q.id}`"
                   scope="col"
-                  class="min-w-56 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
+                  class="min-w-[14rem] px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
                 >
-                  {{ q.title }}
+                  <div class="truncate" :title="q.title">{{ q.title }}</div>
                 </th>
               </tr>
             </thead>
 
             <tbody class="divide-y divide-slate-200 bg-white">
               <tr v-for="r in responses" :key="r.id" class="hover:bg-slate-50">
-                <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">{{ r.submittedAt }}</td>
-                <td v-for="q in questions" :key="q.id" class="px-6 py-4 text-sm text-slate-900">
-                  {{ formatAnswer(r.answers[q.id]) }}
+                <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">{{ new Date(r.submittedAt).toLocaleString() }}</td>
+                <td v-for="q in flatQuestions" :key="`${q.pageId}_${q.id}`" class="px-6 py-4 text-sm text-slate-900 truncate max-w-xs">
+                  {{ formatAnswer(r.answers[`${q.pageId}_${q.id}`]) }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="flex items-center justify-between gap-3 border-t border-slate-200 px-6 py-4">
+        <div class="flex items-center justify-between gap-3 border-t border-slate-200 px-6 py-4 bg-slate-50">
           <p class="text-sm text-slate-600">Tip: Click “Export CSV” to download all responses.</p>
           <div class="flex gap-2">
-            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" disabled>
+            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50" disabled>
               Prev
             </button>
-            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" disabled>
+            <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50" disabled>
               Next
             </button>
           </div>

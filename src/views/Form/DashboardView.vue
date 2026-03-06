@@ -3,45 +3,44 @@ import { ref } from "vue";
 import axios from "axios";
 import { RouterLink } from "vue-router";
 
-const forms = ref<Array<{ id: number; title: string; createdAt: string;}>>([]);
+const projects = ref<Array<{ id: number; title: string; createdAt: string;}>>([]);
 
 const count = ref<number>(0);
 
-const fetchForms = async () => {
+const fetchProjects = async () => {
   try {
-    const response = await axios.get("/api/forms");
-    forms.value = response.data.forms;
-    count.value = forms.value.length;
+    const response = await axios.get("/api/projects");
+    projects.value = response.data.projects;
+    count.value = projects.value.length;
   } catch (error) {
-    console.error("Error fetching forms:", error);
+    console.error("Error fetching projects:", error);
   }
 };
 
 const isCreateOpen = ref(false);
-const newForm = ref({
+const newProject = ref({
   title: "",
   description: "",
 });
 
-const createForm = async () => {
+const createProject = async () => {
   try {
-    const response = await axios.post("/api/forms", newForm.value);
+    await axios.post("/api/projects", newProject.value);
   } catch (error) {
-    console.error("Error creating form:", error);
+    console.error("Error creating project:", error);
   } finally {
     isCreateOpen.value = false;
-    fetchForms();
+    fetchProjects();
   }
 };
 
-fetchForms();
-
+fetchProjects();
 
 </script>
 
 <template>
   <div class="min-h-screen bg-slate-50">
-    <!-- Create form modal -->
+    <!-- Create project modal -->
     <div v-if="isCreateOpen" class="fixed inset-0 z-50">
       <div class="absolute inset-0 bg-slate-900/40" @click="isCreateOpen = false" />
 
@@ -49,7 +48,7 @@ fetchForms();
         <div class="flex h-full flex-col bg-white shadow-2xl">
           <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
             <div>
-              <h2 class="text-base font-semibold text-slate-900">New form</h2>
+              <h2 class="text-base font-semibold text-slate-900">New project</h2>
               <p class="mt-1 text-sm text-slate-600">Add a title and description to get started.</p>
             </div>
             <button
@@ -65,18 +64,18 @@ fetchForms();
           </div>
 
           <form
-            id="create-form"
+            id="create-project"
             class="flex-1 space-y-4 overflow-y-auto px-6 py-5"
-            @submit.prevent="createForm"
+            @submit.prevent="createProject"
           >
             <div>
               <label for="title" class="block text-sm font-medium text-slate-700">Title</label>
               <div class="mt-1">
                 <input
                   id="title"
-                  v-model.trim="newForm.title"
+                  v-model.trim="newProject.title"
                   type="text"
-                  placeholder="e.g. Customer Feedback"
+                  placeholder="e.g. Employee Onboarding"
                   class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                 />
               </div>
@@ -87,9 +86,9 @@ fetchForms();
               <div class="mt-1">
                 <textarea
                   id="description"
-                  v-model.trim="newForm.description"
+                  v-model.trim="newProject.description"
                   rows="4"
-                  placeholder="Tell respondents what this form is for..."
+                  placeholder="Tell respondents what this project is for..."
                   class="block w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                 />
               </div>
@@ -106,7 +105,7 @@ fetchForms();
               Cancel
             </button>
             <button
-              form="create-form"
+              form="create-project"
               type="submit"
               class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200"
             >
@@ -122,7 +121,7 @@ fetchForms();
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
-          <p class="mt-1 text-sm text-slate-600">Manage your forms: create, edit, and share.</p>
+          <p class="mt-1 text-sm text-slate-600">Manage your projects: create pages, edit, and share.</p>
         </div>
 
         <div class="flex w-full gap-3 sm:w-auto">
@@ -134,7 +133,7 @@ fetchForms();
             </div>
             <input
               type="text"
-              placeholder="Search forms…"
+              placeholder="Search projects…"
               class="block w-full rounded-lg border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
             />
           </div>
@@ -147,7 +146,7 @@ fetchForms();
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
             </svg>
-            New form
+            New project
           </button>
         </div>
       </div>
@@ -155,8 +154,8 @@ fetchForms();
       <!-- Content -->
       <div class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-200 px-6 py-4">
-          <h2 class="text-sm font-semibold text-slate-900">Your forms</h2>
-          <p class="mt-1 text-sm text-slate-600">All forms you have created (newest first).</p>
+          <h2 class="text-sm font-semibold text-slate-900">Your projects</h2>
+          <p class="mt-1 text-sm text-slate-600">All projects you have created (newest first).</p>
         </div>
 
         <!-- Table (desktop) -->
@@ -165,7 +164,7 @@ fetchForms();
             <thead class="bg-slate-50">
               <tr>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                  Form
+                  Project
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
                   Created
@@ -179,8 +178,7 @@ fetchForms();
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 bg-white">
-              <!-- Sample row (replace with v-for later) -->
-              <tr v-for="form in forms" :key="form.id" class="hover:bg-slate-50">
+              <tr v-for="project in projects" :key="project.id" class="hover:bg-slate-50">
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
@@ -189,28 +187,28 @@ fetchForms();
                       </svg>
                     </div>
                     <div>
-                      <div class="font-medium text-slate-900">{{ form.title }}</div>
+                      <div class="font-medium text-slate-900">{{ project.title }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 text-sm text-slate-700">{{ form.createdAt }}</td>
+                <td class="px-6 py-4 text-sm text-slate-700">{{ new Date(project.createdAt).toLocaleDateString() }}</td>
                 <td class="px-6 py-4">
                   <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Active</span>
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-end gap-2">
                     <RouterLink
-                      :to="`/forms/${form.id}/edit`"
+                      :to="`/projects/${project.id}`"
                       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487a2.1 2.1 0 0 1 2.97 2.97L8.5 18.79 4 20l1.21-4.5L16.862 4.487Z" />
                       </svg>
-                      Edit
+                      Edit Pages
                     </RouterLink>
 
                     <RouterLink
-                      :to="`/forms/${form.id}/responses`"
+                      :to="`/projects/${project.id}/responses`"
                       class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
@@ -220,7 +218,7 @@ fetchForms();
                     </RouterLink>
 
                     <RouterLink
-                      :to="`/forms/${form.id}`"
+                      :to="`/projects/${project.id}/public`"
                       class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
                       title="Copy public link"
                     >
@@ -233,8 +231,8 @@ fetchForms();
                 </td>
               </tr>
 
-              <!-- Empty-state row (keep for later) -->
-              <tr class="hidden">
+              <!-- Empty State -->
+              <tr v-if="projects.length === 0">
                 <td colspan="4" class="px-6 py-12">
                   <div class="mx-auto max-w-sm text-center">
                     <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
@@ -242,16 +240,17 @@ fetchForms();
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 20h10a2 2 0 0 0 2-2V6.5a2 2 0 0 0-.6-1.4l-2.5-2.5A2 2 0 0 0 14.5 2H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" />
                       </svg>
                     </div>
-                    <h3 class="mt-4 text-sm font-semibold text-slate-900">No forms yet</h3>
-                    <p class="mt-1 text-sm text-slate-600">Create your first form to start collecting responses.</p>
+                    <h3 class="mt-4 text-sm font-semibold text-slate-900">No projects yet</h3>
+                    <p class="mt-1 text-sm text-slate-600">Create your first project to start collecting responses.</p>
                     <button
                       type="button"
+                      @click="isCreateOpen = true"
                       class="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200"
                     >
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
                       </svg>
-                      New form
+                      New project
                     </button>
                   </div>
                 </td>
@@ -260,29 +259,9 @@ fetchForms();
           </table>
         </div>
 
-        <!-- Cards (mobile) -->
-        <div class="divide-y divide-slate-200 sm:hidden">
-          <!-- Sample card (replace with v-for later) -->
-          <div class="p-4">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <div class="font-medium text-slate-900">Customer Feedback</div>
-                <div class="mt-1 text-sm text-slate-600">Created 2026-01-11</div>
-              </div>
-              <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">Active</span>
-            </div>
-            <div class="mt-3 text-xs text-slate-500">/forms/customer-feedback</div>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm">Edit</button>
-              <a href="#" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm">View</a>
-              <button type="button" class="rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-semibold text-indigo-700">Link</button>
-            </div>
-          </div>
-        </div>
-
         <!-- Footer -->
         <div class="flex items-center justify-between gap-3 border-t border-slate-200 px-6 py-4">
-          <p class="text-sm text-slate-600">Showing <span class="font-medium text-slate-900">{{ count }}</span> forms</p>
+          <p class="text-sm text-slate-600">Showing <span class="font-medium text-slate-900">{{ count }}</span> projects</p>
           <div class="flex gap-2">
             <button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50" disabled>
               Prev
@@ -297,12 +276,12 @@ fetchForms();
       <!-- Tips / secondary section -->
       <div class="mt-8 grid gap-4 lg:grid-cols-3">
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 class="text-sm font-semibold text-slate-900">Share your form</h3>
+          <h3 class="text-sm font-semibold text-slate-900">Share your project</h3>
           <p class="mt-1 text-sm text-slate-600">Use the public link to collect responses from anyone.</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 class="text-sm font-semibold text-slate-900">Edit anytime</h3>
-          <p class="mt-1 text-sm text-slate-600">Update questions without losing your form link.</p>
+          <p class="mt-1 text-sm text-slate-600">Update questions and pages without losing your link.</p>
         </div>
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 class="text-sm font-semibold text-slate-900">View responses</h3>

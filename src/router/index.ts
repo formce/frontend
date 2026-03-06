@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import {useAuthStore} from "@/stores/auth";
-import {storeToRefs} from "pinia";
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,7 +21,7 @@ const router = createRouter({
       component: () => import('@/views/RegisterView.vue'),
     },
     {
-      path: '/forms/dashboard',
+      path: '/projects/dashboard',
       name: 'dashboard',
       component: () => import('@/views/Form/DashboardView.vue'),
       meta: {
@@ -29,20 +29,28 @@ const router = createRouter({
       }
     },
     {
-      path: '/forms/:formId/edit',
-      name: 'editForm',
+      path: '/projects/:projectId',
+      name: 'projectView',
+      component: () => import('@/views/Form/ProjectView.vue'),
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/projects/:projectId/pages/:pageId/edit',
+      name: 'editPage',
       component: () => import('@/views/Form/EditView.vue'),
       meta: {
         requiresAuth: true
       }
     },
     {
-      path: '/forms/:formId',
+      path: '/projects/:projectId/public',
       name: 'publicForm',
       component: () => import('@/views/Form/PublicView.vue'),
     },
     {
-      path: '/forms/:formId/responses',
+      path: '/projects/:projectId/responses',
       name: 'formResponses',
       component: () => import('@/views/Form/ResponsesView.vue'),
       meta: {
@@ -52,14 +60,17 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) =>{
-  if (to.meta.requiresAuth){
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
     const authStore = useAuthStore();
-    const {isAuthenticated} = storeToRefs(authStore);
+    const { isAuthenticated } = storeToRefs(authStore);
     console.log(isAuthenticated.value)
-    if(! isAuthenticated.value){
-      next('/login')
-    } else{
+    if (!isAuthenticated.value) {
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
+    } else {
       next()
     }
   } else {

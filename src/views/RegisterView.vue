@@ -2,6 +2,7 @@
 import { useAuthStore } from "@/stores/auth";
 import { reactive } from "vue";
 import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
 
 const form = reactive({
   email: "",
@@ -9,10 +10,14 @@ const form = reactive({
 });
 
 const authStore = useAuthStore();
-const { errorMessage } = storeToRefs(authStore);
+const { errorMessage, isAuthenticated } = storeToRefs(authStore);
+const router = useRouter();
 
 const onSubmit = async () => {
   await authStore.register(form);
+  if (isAuthenticated.value) {
+    router.push('/projects/dashboard');
+  }
 };
 </script>
 
